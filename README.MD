@@ -4,6 +4,7 @@
 
 ```sh
 python reporting-health.py --secure_url_authority app.us4.sysdig.com --api_token xyz
+```
 
 ## Output:
 
