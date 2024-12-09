@@ -16,7 +16,6 @@ class UnexpectedHTTPResponse(Exception):
 http_client = urllib3.PoolManager()
 
 def _parse_args():
-
     args = None
 
     parser = argparse.ArgumentParser(
@@ -50,7 +49,6 @@ def main():
         http_client.headers["Content-Type"] = "application/json"
 
         now_epoch = int(time.time())
-        h_24_epoch = now_epoch - 86400
         d_30_epoch = now_epoch - 30 * 86400
 
         # Get clusters from runtime findings
@@ -63,8 +61,6 @@ def main():
 
         if response.status == 200:
             json_response_data = json.loads(response.data.decode())
-            
-            print(f"clusters: {json_response_data}\n\n")
 
             for cluster_name in json_response_data.get('values', []):
                 try:
@@ -94,12 +90,17 @@ def main():
                                     
                                 if response.status == 200:
                                     json_agent_data = json.loads(response.data.decode())
-                                    for agent in json_agent_data['details']:
-                                        print(f"\tAgent Status: {agent['clusterName']} {agent['labels']['hostname']} {agent['agentStatus']}")
+                                    for agent in json_agent_data.get('details', []):
+                                        cluster_name = agent.get('clusterName', 'N/A')
+                                        hostname = agent.get('labels', {}).get('hostname', 'N/A')
+                                        agent_status = agent.get('agentStatus', 'N/A')
+                                        print(f"\t\tAgent Status: {cluster_name} {hostname} {agent_status}")
                                 else:
                                    raise UnexpectedHTTPResponse(
                                             f"Unexpected HTTP response status: {response.status}"
                                         )
+                            else:
+                                print(f"Cluster {cluster_name}: Okay")
 
 
                 else:  
